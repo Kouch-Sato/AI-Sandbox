@@ -4,7 +4,6 @@ const openaiKey = properties.getProperty('OPENAI_API_KEY');
 const sheetId = properties.getProperty('SHEET_ID');
 const lineReplyApi = 'https://api.line.me/v2/bot/message/reply';
 const openaiApi = 'https://api.openai.com/v1/chat/completions';
-const textPrompt = 'あなたはフレンドリーな解説員です。ユーザーの入力に対して、その単語の説明やちょっとした豆知識を200文字程度で返してください。 返答は口語的でその単語に関する内容だけ返してください。 （わかりました、などの返事は不要です）';
 
 function getSheet(name) {
   const sheet = SpreadsheetApp.openById(sheetId).getSheetByName(name);
