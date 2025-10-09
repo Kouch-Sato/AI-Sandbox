@@ -4,6 +4,7 @@ const openai_key = properties.getProperty('OPENAI_API_KEY');
 const sheet_id = properties.getProperty('SHEET_ID');
 const line_reply_api = 'https://api.line.me/v2/bot/message/reply';
 const openai_api = 'https://api.openai.com/v1/chat/completions';
+const text_prompt = 'あなたはフレンドリーな解説員です。ユーザーの入力に対して、その単語の説明やちょっとした豆知識を200文字程度で返してください。 返答は口語的でその単語に関する内容だけ返してください。 （わかりました、などの返事は不要です）';
 
 function getSheet(name) {
   const sheet = SpreadsheetApp.openById(sheet_id).getSheetByName(name);
@@ -57,7 +58,7 @@ function generateTextWithGPT(userText) {
     const payload = {
       model: 'gpt-5-chat-latest',
       messages: [
-        { role: 'system', content: 'あなたはフレンドリーな解説員です。ユーザーの入力に対して、その単語の説明やちょっとした豆知識を200文字程度で返してください。 返答は口語的でその単語に関する内容だけ返してください。 （わかりました、などの返事は不要です）' },
+        { role: 'system', content: text_prompt },
         { role: 'user',   content: userText }
       ],
       // 必要に応じて:
