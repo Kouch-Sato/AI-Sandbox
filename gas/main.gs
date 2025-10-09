@@ -29,7 +29,7 @@ function doPost(e) {
 
   const replyText = generateTextWithGPT(userText);
 
-  logChatToSheet(userId, 'bot', replyText);
+  logChatToSheet(userId, 'assistant', replyText);
 
   const payload =  {
     replyToken: replyToken,
