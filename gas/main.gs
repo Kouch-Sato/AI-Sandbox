@@ -51,7 +51,7 @@ function generateTextWithGPT(userText, chatHistory, extractedTrigger) {
     model: 'gpt-5-chat-latest',
     messages: [
       { role: 'system', content: replyChatPrompt },
-      { role: 'system', context: "extractTrigger: " + JSON.stringify(extractedTrigger) },
+      { role: 'system', content: "extractTrigger: " + JSON.stringify(extractedTrigger) },
       ...chatHistory,
       { role: 'user',   content: userText }
     ],
