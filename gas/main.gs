@@ -2,6 +2,7 @@ const properties = PropertiesService.getScriptProperties();
 const accessToken = properties.getProperty('LINE_CHANNEL_ACCESS_TOKEN');
 const openaiKey = properties.getProperty('OPENAI_API_KEY');
 const sheetId = properties.getProperty('SHEET_ID');
+const kouchUserId = properties.getProperty('KOUCH_LINE_USER_ID');
 const lineReplyApi = 'https://api.line.me/v2/bot/message/reply';
 const openaiApi = 'https://api.openai.com/v1/chat/completions';
 
@@ -21,6 +22,10 @@ function doPost(e) {
   const chatHistory = getChatHistory(userId);
   const extractedTrigger = extractTriggerWithGPT(userText, chatHistory);
   const replyText = generateTextWithGPT(userText, chatHistory, extractedTrigger);
+
+  if (extractedTrigger) {
+    logTriggerToSheet(userId, extractedTrigger);
+  }
 
   logChatToSheet(userId, 'assistant', replyText);
 
@@ -122,5 +127,16 @@ function pickJsonOrNull(text) {
     return JSON.parse(token);
   } catch (_) {
     return null;
+  }
+};
+
+function logTriggerToSheet(userId, trigger) {
+  const sheet = getSheet('trigger');
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow(['timestamp', 'user_id', 'when_iso', 'action', 'reminder_text']);
+  }
+
+  if (trigger) {
+    sheet.appendRow([new Date(), userId, trigger.when_iso, trigger.action, trigger.reminder_text]);
   }
 };
