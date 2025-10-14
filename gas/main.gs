@@ -45,33 +45,33 @@ function doPost(e) {
 };
 
 function generateTextWithGPT(userId, userText) {
-    const chatHistory = getChatHistory(userId);
+  const chatHistory = getChatHistory(userId);
 
-    const payload = {
-      model: 'gpt-5-chat-latest',
-      messages: [
-        { role: 'system', content: replyChatPrompt },
-        ...chatHistory,
-        { role: 'user',   content: userText }
-      ],
-      // 必要に応じて:
-      // temperature: 0.7,
-      max_tokens: 200,
-    };
+  const payload = {
+    model: 'gpt-5-chat-latest',
+    messages: [
+      { role: 'system', content: replyChatPrompt },
+      ...chatHistory,
+      { role: 'user',   content: userText }
+    ],
+    // 必要に応じて:
+    // temperature: 0.7,
+    max_tokens: 200,
+  };
 
-    const params = {
-      method: 'post',
-      contentType: 'application/json; charset=UTF-8',
-      headers: {
-        Authorization: 'Bearer ' + openaiKey
-      },
-      payload: JSON.stringify(payload)
-    };
+  const params = {
+    method: 'post',
+    contentType: 'application/json; charset=UTF-8',
+    headers: {
+      Authorization: 'Bearer ' + openaiKey
+    },
+    payload: JSON.stringify(payload)
+  };
 
-    const res = UrlFetchApp.fetch(openaiApi, params);
+  const res = UrlFetchApp.fetch(openaiApi, params);
 
-    const json = JSON.parse(res.getContentText());
-    // Chat Completionsの返却形式：choices[0].message.content
-    const text = (json && json.choices && json.choices[0] && json.choices[0].message && json.choices[0].message.content) || '（すみません、うまく生成できませんでした）';
-    return text.trim();
+  const json = JSON.parse(res.getContentText());
+  // Chat Completionsの返却形式：choices[0].message.content
+  const text = (json && json.choices && json.choices[0] && json.choices[0].message && json.choices[0].message.content) || '（すみません、うまく生成できませんでした）';
+  return text.trim();
 };
