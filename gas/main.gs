@@ -27,7 +27,7 @@ function doPost(e) {
 
   logChatToSheet(userId, 'user', userText);
 
-  const replyText = generateTextWithGPT(userText);
+  const replyText = generateTextWithGPT(userId, userText);
 
   logChatToSheet(userId, 'assistant', replyText);
 
@@ -53,11 +53,14 @@ function doPost(e) {
   UrlFetchApp.fetch(lineReplyApi, params);
 };
 
-function generateTextWithGPT(userText) {
+function generateTextWithGPT(userId, userText) {
+    const chatHistory = getChatHistory(userId);
+
     const payload = {
       model: 'gpt-5-chat-latest',
       messages: [
         { role: 'system', content: textPrompt },
+        ...chatHistory,
         { role: 'user',   content: userText }
       ],
       // 必要に応じて:
@@ -81,3 +84,25 @@ function generateTextWithGPT(userText) {
     const text = (json && json.choices && json.choices[0] && json.choices[0].message && json.choices[0].message.content) || '（すみません、うまく生成できませんでした）';
     return text.trim();
 };
+
+function getChatHistory(userId) {
+  const sheet = getSheet('chat_log');
+  const data = sheet.getDataRange().getValues();
+
+  const userChat = data.filter(row => row[1] === userId);
+
+  // userChatの各行は [timestamp, user_id, direction, text] の形式
+  // これをChatGPTの会話履歴形式に変換
+  // directionが'user'か'assistant'に対応
+  // 例:
+  // { role: "assistant", content: "アシスタントの性格や目的の指定" },
+  // { role: "user", content: "ユーザーの発言" },
+  // { role: "assistant", content: "モデルの返答" },
+  // { role: "user", content: "次の発言" },
+
+  const chatHistory = userChat.map(row => {
+    return { role: row[2], content: row[3] };
+  });
+
+  return chatHistory;
+}
