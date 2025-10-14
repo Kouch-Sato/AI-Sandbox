@@ -18,7 +18,9 @@ function doPost(e) {
 
   logChatToSheet(userId, 'user', userText);
 
-  const replyText = generateTextWithGPT(userId, userText);
+  const chatHistory = getChatHistory(userId);
+  const extractedTrigger = extractTriggerWithGPT(userText, chatHistory);
+  const replyText = generateTextWithGPT(userText, chatHistory, extractedTrigger);
 
   logChatToSheet(userId, 'assistant', replyText);
 
@@ -44,13 +46,12 @@ function doPost(e) {
   UrlFetchApp.fetch(lineReplyApi, params);
 };
 
-function generateTextWithGPT(userId, userText) {
-  const chatHistory = getChatHistory(userId);
-
+function generateTextWithGPT(userText, chatHistory, extractedTrigger) {
   const payload = {
     model: 'gpt-5-chat-latest',
     messages: [
       { role: 'system', content: replyChatPrompt },
+      { role: 'system', context: "extractTrigger: " + JSON.stringify(extractedTrigger) },
       ...chatHistory,
       { role: 'user',   content: userText }
     ],
@@ -74,4 +75,52 @@ function generateTextWithGPT(userId, userText) {
   // Chat Completionsの返却形式：choices[0].message.content
   const text = (json && json.choices && json.choices[0] && json.choices[0].message && json.choices[0].message.content) || '（すみません、うまく生成できませんでした）';
   return text.trim();
+};
+
+function extractTriggerWithGPT(userText, chatHistory) {
+  const payload = {
+    model: 'gpt-5-chat-latest',
+    messages: [
+      { role: 'system', content: extractTriggerPrompt },
+      ...chatHistory,
+      { role: 'user',   content: userText }
+    ],
+    max_tokens: 200,
+    temperature: 0.1,
+  };
+
+  const params = {
+    method: 'post',
+    contentType: 'application/json; charset=UTF-8',
+    headers: {
+      Authorization: 'Bearer ' + openaiKey
+    },
+    payload: JSON.stringify(payload)
+  };
+
+  const res = UrlFetchApp.fetch(openaiApi, params);
+
+  const json = JSON.parse(res.getContentText());
+  const text = (json && json.choices && json.choices[0] && json.choices[0].message && json.choices[0].message.content) || '';
+  return pickJsonOrNull(text);
+};
+
+function pickJsonOrNull(text) {
+  if (!text) return null;
+  const s = String(text).trim();
+
+  // ```json ... ``` や ``` ... ``` を剥がす
+  const fenced = s.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+  const raw = fenced ? fenced[1].trim() : s;
+
+  // 先頭の { ... } だけ抜き出す or null
+  const objMatch = raw.match(/{[\s\S]*}/);
+  const token = objMatch ? objMatch[0] : (raw === 'null' ? 'null' : null);
+  if (!token) return null;
+
+  try {
+    return JSON.parse(token);
+  } catch (_) {
+    return null;
+  }
 };
