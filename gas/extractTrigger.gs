@@ -1,10 +1,16 @@
 function extractTriggerWithGPT(userText, chatHistory) {
+  const nowIsoJst = Utilities.formatDate(new Date(), 'Asia/Tokyo', "yyyy-MM-dd'T'HH:mm:ssXXX");
+  const userInput = {
+    text: userText,
+    now: nowIsoJst,
+  }
+
   const payload = {
     model: 'gpt-5-chat-latest',
     messages: [
       { role: 'system', content: extractTriggerPrompt },
       ...chatHistory,
-      { role: 'user',   content: userText }
+      { role: 'user',   content: JSON.stringify(userInput) }
     ],
     max_tokens: 200,
     temperature: 0.1,
