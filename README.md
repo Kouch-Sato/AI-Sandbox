@@ -7,3 +7,7 @@
 ```
 $ pip install openai chromadb numpy python-dotenv
 ```
+
+```
+$pip install langchain langchain-openai langchain-community
+```
