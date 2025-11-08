@@ -3,37 +3,42 @@ import os
 from openai import OpenAI
 from numpy import dot
 from numpy.linalg import norm
-load_dotenv()
+import chromadb
+from chromadb.utils import embedding_functions
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+load_dotenv()
 embedding_model = "text-embedding-3-large"
 
-base_text = "今日は雨が降ってるな"
-
-base_emb = client.embeddings.create(
-  model = embedding_model,
-  input = base_text
+client = chromadb.Client()
+openai_ef = embedding_functions.OpenAIEmbeddingFunction(
+  api_key = os.getenv("OPENAI_API_KEY"),
+  model_name = embedding_model
 )
-base_vec = base_emb.data[0].embedding
 
-compare_texts = [
+collection = client.create_collection(
+  name = "test_collection",
+  embedding_function = openai_ef
+)
+
+texts = [
   "本日の天気は雨です",
   "傘を持っていかないと",
-  "天気予報を確認しよう",
   "私は神だ！",
   "株式会社Flamers",
   "This is a pen."
 ]
 
-compare_embs = client.embeddings.create(
-  model = embedding_model,
-  input = compare_texts
+collection.add(
+  documents = texts, 
+  ids = [f"doc_{i}" for i in range(len(texts))]
 )
-compare_vecs = [e.embedding for e in compare_embs.data]
 
-def cosine_similarity(a, b):
-    return dot(a, b) / (norm(a) * norm(b))  
+query_text = "私は誰？"
+results = collection.query(
+  query_texts = [query_text],
+  n_results = 3
+)   
 
-for text, vec in zip(compare_texts, compare_vecs):
-    sim = cosine_similarity(base_vec, vec)
-    print(f"{text}: {sim:.4f}")
+print(results["documents"][0][0])
+print(results["documents"][0][1])
+print(results["documents"][0][2])
