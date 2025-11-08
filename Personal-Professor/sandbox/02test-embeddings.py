@@ -6,11 +6,12 @@ from numpy.linalg import norm
 load_dotenv()
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+embedding_model = "text-embedding-3-large"
 
 base_text = "今日は雨が降ってるな"
 
 base_emb = client.embeddings.create(
-  model = "text-embedding-3-large",
+  model = embedding_model,
   input = base_text
 )
 base_vec = base_emb.data[0].embedding
@@ -25,7 +26,7 @@ compare_texts = [
 ]
 
 compare_embs = client.embeddings.create(
-  model = "text-embedding-3-large",
+  model = embedding_model,
   input = compare_texts
 )
 compare_vecs = [e.embedding for e in compare_embs.data]
