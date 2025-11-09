@@ -47,8 +47,6 @@ def rag_answer(question: str):
   for i in range(3):
     contexts.append(f"[{i+1}] {response['documents'][0][i]}")
 
-  print(contexts)
-
   prompt = f"""
     以下の情報をもとに質問に答えてください。
     あなたは厳密なリサーチアシスタントです。
