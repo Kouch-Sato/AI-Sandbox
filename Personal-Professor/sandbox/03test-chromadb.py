@@ -9,13 +9,13 @@ from chromadb.utils import embedding_functions
 load_dotenv()
 embedding_model = "text-embedding-3-large"
 
-client = chromadb.Client()
+client = chromadb.PersistentClient(path="./chroma_db")
 openai_ef = embedding_functions.OpenAIEmbeddingFunction(
   api_key = os.getenv("OPENAI_API_KEY"),
   model_name = embedding_model
 )
 
-collection = client.create_collection(
+collection = client.get_or_create_collection(
   name = "test_collection",
   embedding_function = openai_ef
 )
@@ -29,15 +29,15 @@ texts = [
     "なみしろさんという方と結婚しています"
 ]
 
-collection.add(
+collection.upsert(
   documents = texts, 
   ids = [f"doc_{i}" for i in range(len(texts))]
 )
 
-query_text = "趣味は何？"
+query_text = "どこで生まれたの？"
 results = collection.query(
   query_texts = [query_text],
-  n_results = 6
+  n_results = 6,
 )   
 
 for i in range(6):
