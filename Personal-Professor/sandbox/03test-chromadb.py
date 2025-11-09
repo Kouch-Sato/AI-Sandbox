@@ -21,11 +21,12 @@ collection = client.create_collection(
 )
 
 texts = [
-  "本日の天気は雨です",
-  "傘を持っていかないと",
-  "私は神だ！",
-  "株式会社Flamers",
-  "This is a pen."
+    "私はオランダで生まれて、東京で育ちました",
+    "趣味はボードゲームとポーカーです。",
+    "AIやスタートアップの世界にワクワクするタイプです。",
+    "休日はカフェで読書することが多い。",
+    "猫を飼っていて、毎朝一緒に起きます。",
+    "なみしろさんという方と結婚しています"
 ]
 
 collection.add(
@@ -33,12 +34,11 @@ collection.add(
   ids = [f"doc_{i}" for i in range(len(texts))]
 )
 
-query_text = "私は誰？"
+query_text = "趣味は何？"
 results = collection.query(
   query_texts = [query_text],
-  n_results = 3
+  n_results = 6
 )   
 
-print(results["documents"][0][0])
-print(results["documents"][0][1])
-print(results["documents"][0][2])
+for i in range(6):
+    print(results["documents"][0][i], results["distances"][0][i])
