@@ -9,5 +9,5 @@ $ pip install openai chromadb numpy python-dotenv
 ```
 
 ```
-$pip install langchain langchain-openai langchain-community
+$pip install -U langchain langchain-openai langchain-community langchain-core langchain-chroma
 ```
