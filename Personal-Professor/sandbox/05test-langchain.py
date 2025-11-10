@@ -1,27 +1,30 @@
 from dotenv import load_dotenv
 import os
-from openai import OpenAI
-from numpy import dot
-from numpy.linalg import norm
-import chromadb
-from chromadb.utils import embedding_functions
-
 load_dotenv()
+
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.runnables import RunnablePassthrough
+
+llm_model = "gpt-4o"
 embedding_model = "text-embedding-3-large"
-openai_client = OpenAI(
-  api_key = os.getenv("OPENAI_API_KEY")
-)
 
-chromadb_client = chromadb.PersistentClient(path="./chroma_db")
-openai_ef = embedding_functions.OpenAIEmbeddingFunction(
+llm = ChatOpenAI(
   api_key = os.getenv("OPENAI_API_KEY"),
-  model_name = embedding_model
+  model_name = "gpt-4o",
+  temperature = 0,    
 )
 
-collection = chromadb_client.get_or_create_collection(
-  name = "test_collection",
-  embedding_function = openai_ef
+emb = OpenAIEmbeddings(
+  api_key = os.getenv("OPENAI_API_KEY"),
+  model = embedding_model,
 )
+
+# VetrorStore: Chromaのようにデータを保存する場所
+from langchain_chroma import Chroma
+from langchain_core.documents import Document
 
 texts = [
   "私はオランダで生まれて、東京で育ちました",
@@ -32,41 +35,66 @@ texts = [
   "なみしろさんという方と結婚しています"
 ]
 
-collection.upsert(
-  documents = texts, 
-  ids = [f"doc_{i}" for i in range(len(texts))]
+docs = [
+  Document(page_content=t, metadata={"id": f"doc_{i}"})
+   for i, t in enumerate(texts)
+   ]
+
+
+vectorstore = Chroma(
+  collection_name = "test_collection", 
+  embedding_function = emb,
+  persist_directory = "./chroma_db",
 )
 
-def rag_answer(question: str):
-  response = collection.query(
-    query_texts = [question],
-    n_results = 3,
-  )   
+if vectorstore._collection.count() == 0:
+  vectorstore.add_documents(docs)
+  vectorstore.persist()
 
+
+# Retriever: 検索のためのもの
+retriever = vectorstore.as_retriever(search_kwargs = { "k": 3 })
+
+
+# Promopt: LLMに与える指示
+USER_TEMPLATE = """
+  以下の情報をもとに質問に答えてください。
+  あなたは厳密なリサーチアシスタントです。
+  以下の「参照メモ」に書かれている内容【だけ】を根拠に、日本語で簡潔に答えてください。
+  参照に無い内容は推測せず、「手元のメモには情報がありません」と述べてください。
+  回答の最後に、使った根拠の番号を [1] のように列挙してください。
+
+  参考メモ: {context}
+  質問: {question}
+"""
+
+prompt = ChatPromptTemplate.from_messages([
+  ("system", "あなたは厳密なリサーチアシスタントです。"),
+  ("user", USER_TEMPLATE)
+])
+
+def format_docs_with_numbers(docs):
   contexts = []
-  for i in range(3):
-    contexts.append(f"[{i+1}] {response['documents'][0][i]}")
+  for i, doc in enumerate(docs):
+    contexts.append(f"[{i+1}] {doc.page_content}")
+  return "\n".join(contexts)
 
-  prompt = f"""
-    以下の情報をもとに質問に答えてください。
-    あなたは厳密なリサーチアシスタントです。
-    以下の「参照メモ」に書かれている内容【だけ】を根拠に、日本語で簡潔に答えてください。
-    参照に無い内容は推測せず、「手元のメモには情報がありません」と述べてください。
-    回答の最後に、使った根拠の番号を [1] のように列挙してください。
 
-    参考メモ: {contexts}
-    質問: {question}
-  """
+# RAG Chainの実装
+from langchain_core.runnables import RunnableLambda
 
-  chat_response = openai_client.chat.completions.create(
-    model="gpt-4o",
-    messages=[
-        {"role": "system", "content": "あなたは厳密なリサーチアシスタントです。"},
-        {"role": "user", "content": prompt}
-    ]
-  )
+rag_chain = (
+  {
+    "context": RunnableLambda(lambda x: format_docs_with_numbers(retriever.invoke(x["question"]))),
+    "question": RunnablePassthrough(),
+  }
+  | prompt
+  | llm
+  | StrOutputParser()
+)
 
-  return chat_response.choices[0].message.content
+def rag_answer(question: str) -> str:
+  return rag_chain.invoke({ "question": question })
 
 print("質問を入力してください")
 user_question = input("質問: ")
