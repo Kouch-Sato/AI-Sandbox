@@ -13,7 +13,7 @@ embedding_model = "text-embedding-3-large"
 
 llm = ChatOpenAI(
   api_key = os.getenv("OPENAI_API_KEY"),
-  model_name = "gpt-4o",
+  model = llm_model,
   temperature = 0,    
 )
 
@@ -38,7 +38,8 @@ texts = [
 docs = [
   Document(page_content=t, metadata={"id": f"doc_{i}"})
    for i, t in enumerate(texts)
-   ]
+]
+doc_ids = [f"doc_{i}" for i in range(len(texts))]
 
 
 vectorstore = Chroma(
@@ -48,13 +49,11 @@ vectorstore = Chroma(
 )
 
 if vectorstore._collection.count() == 0:
-  vectorstore.add_documents(docs)
+  vectorstore.add_documents(docs, ids = doc_ids)
   vectorstore.persist()
-
 
 # Retriever: 検索のためのもの
 retriever = vectorstore.as_retriever(search_kwargs = { "k": 3 })
-
 
 # Promopt: LLMに与える指示
 USER_TEMPLATE = """
