@@ -1,8 +1,6 @@
 from dotenv import load_dotenv
 import os
 from openai import OpenAI
-from numpy import dot
-from numpy.linalg import norm
 import chromadb
 from chromadb.utils import embedding_functions
 
@@ -75,5 +73,4 @@ def rag_answer(question: str):
 print("質問を入力してください")
 user_question = input("質問: ")
 answer = rag_answer(user_question)
-print("回答:")
 print(answer)
