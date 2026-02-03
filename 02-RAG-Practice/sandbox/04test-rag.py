@@ -10,7 +10,7 @@ openai_client = OpenAI(
   api_key = os.getenv("OPENAI_API_KEY")
 )
 
-chromadb_client = chromadb.PersistentClient(path="./chroma_db")
+chromadb_client = chromadb.PersistentClient(path="./02-RAG-Practice/chroma_db")
 openai_ef = embedding_functions.OpenAIEmbeddingFunction(
   api_key = os.getenv("OPENAI_API_KEY"),
   model_name = embedding_model

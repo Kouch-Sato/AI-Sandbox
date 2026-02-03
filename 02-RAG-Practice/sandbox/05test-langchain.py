@@ -45,7 +45,7 @@ doc_ids = [f"doc_{i}" for i in range(len(texts))]
 vectorstore = Chroma(
   collection_name = "test_collection", 
   embedding_function = emb,
-  persist_directory = "./chroma_db",
+  persist_directory = "./02-RAG-Practice/chroma_db",
 )
 
 if vectorstore._collection.count() == 0:
