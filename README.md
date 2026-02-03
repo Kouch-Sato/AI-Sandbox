@@ -1,9 +1,11 @@
 # AI-Snadbox
-## AI-Coach-bot
+## 01-Proactive-AI
 - https://zenn.dev/kouch/articles/be35fc440c4165
 
-# Personal-Professor
-## 初期設定
+## 02-RAG-Practice
+- https://zenn.dev/articles/8f92cc274f038f/edit
+
+### 初期設定
 ```
 $ pip install openai chromadb numpy python-dotenv
 ```
