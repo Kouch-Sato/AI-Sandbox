@@ -11,5 +11,11 @@ $ pip install openai chromadb numpy python-dotenv
 ```
 
 ```
-$pip install -U langchain langchain-openai langchain-community langchain-core langchain-chroma
+$ pip install -U langchain langchain-openai langchain-community langchain-core langchain-chroma
+```
+
+## 03-PyTorch-Practice
+### 初期設定
+```
+$ pip install torch torchvision torchaudio
 ```
