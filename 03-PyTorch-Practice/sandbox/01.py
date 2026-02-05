@@ -1,3 +1,5 @@
+# 一番簡単な線形の回帰モデルの実装例
+# https://zenn.dev/kouch/articles/cf580a6c9d582d
 import torch
 
 # y = - 3x + 10
@@ -18,6 +20,5 @@ for epoch in range(1000):
 	optimizer.zero_grad()
 	loss.backward()
 	optimizer.step()
-
 
 print (model.weight.item(), model.bias.item())
