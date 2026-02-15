@@ -1,3 +1,5 @@
+# MNISTの前半
+# https://zenn.dev/kouch/articles/a28316bffbdba8
 
 import torch
 from torch import nn
