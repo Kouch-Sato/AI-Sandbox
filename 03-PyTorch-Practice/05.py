@@ -14,8 +14,7 @@ train_loader = DataLoader(train_datasets, batch_size=64, shuffle=True, num_worke
 test_loader  = DataLoader(test_datasets, batch_size=256, shuffle=False, num_workers=0)
 
 x, y = train_datasets[10]
-print(x)  # torch.Size([1, 28, 28]) 5
-x.show()
+print(x) 
 
 # model = torch.nn.Sequential(
 #   torch.nn.Linear(in_features = 2, out_features = 16),
