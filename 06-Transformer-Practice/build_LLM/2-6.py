@@ -5,7 +5,6 @@ from torch.utils.data import Dataset, DataLoader
 with open("the-verdict.txt", "r", encoding="utf-8") as f:
     raw_text = f.read()
 
-
 class GPTDataset(Dataset):
     def __init__(self, text, tokenizer, context_length, stride):
         self._input_ids = []
