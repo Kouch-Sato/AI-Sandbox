@@ -11,7 +11,7 @@ all_words.extend(["<|endoftext|>", "<|unk|>"])
 
 vocab = {token: integer for integer, token in enumerate(all_words)}
 
-class SimpleTokenizerV1:
+class SimpleTokenizerV2:
     def __init__(self, vocab):
         self._str_to_int = vocab
         self._int_to_str = {integer: string for string, integer in vocab.items()}
@@ -19,7 +19,12 @@ class SimpleTokenizerV1:
     def encode(self, text):
         preprocessed = re.split(r'([,.:;?_!"()\']|--|\s)', text)
         ## 空白を削除
-        preprocessed = [item.strip() for item in preprocessed if item.strip()]
+        preprocessed = [token.strip() for token in preprocessed if token.strip()]
+        preprocessed = [
+            token if token in self._str_to_int
+            else "<|unk|>" 
+            for token in preprocessed
+        ]
 
         return [self._str_to_int[token] for token in preprocessed]
 
@@ -28,8 +33,11 @@ class SimpleTokenizerV1:
         text = re.sub(r'\s+([,.?!"()\'])', r' \1 ', text)
         return text
 
-tokenizer = SimpleTokenizerV1(vocab)
-text = "This is what I want to say."
+tokenizer = SimpleTokenizerV2(vocab)
+
+text1 = "Hello, do you like tea?"
+text2 = "In the sunlit terraces of the palace."
+text = " <|endoftext|> ".join((text1, text2))
 ids = [3, 4, 11, 100]
 
 print(tokenizer.encode(text))
