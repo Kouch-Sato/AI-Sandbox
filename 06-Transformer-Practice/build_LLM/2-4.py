@@ -1,3 +1,4 @@
+# endoftextやunknownを辞書に追加する
 import re
 
 with open("the-verdict.txt", "r", encoding="utf-8") as f:
@@ -38,7 +39,6 @@ tokenizer = SimpleTokenizerV2(vocab)
 text1 = "Hello, do you like tea?"
 text2 = "In the sunlit terraces of the palace."
 text = " <|endoftext|> ".join((text1, text2))
-ids = [3, 4, 11, 100]
+ids = tokenizer.encode(text)
 
-print(tokenizer.encode(text))
 print(tokenizer.decode(ids))
