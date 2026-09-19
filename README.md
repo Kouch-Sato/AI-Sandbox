@@ -28,5 +28,6 @@ $ pip install torch torchvision torchaudio
 conda create -n transformer python=3.11
 conda activate transformer
 pip install torch numpy
-
+pip install tiktoken
+```
 
