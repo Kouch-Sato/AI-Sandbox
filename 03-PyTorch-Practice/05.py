@@ -39,7 +39,6 @@ for epoch in range(300):
         loss.backward()
         optimizer.step()
 
-
 model.eval()
 
 correct = 0
