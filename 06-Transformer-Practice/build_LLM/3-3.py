@@ -10,16 +10,10 @@ inputs = torch.tensor(
 )
 
 token_count = inputs.shape[0] 
-attention_scores = torch.empty(token_count, token_count) # torch.Size([6, 6])
-for i, x_i in enumerate(inputs):
-    for j, x_j in enumerate(inputs):
-        attention_scores[i][j] = torch.dot(x_i, x_j)
+attention_scores = inputs @ inputs.T # torch.Size([6, 6])
 
 attention_weights = torch.softmax(attention_scores, dim=-1) 
 
-context_vectors = torch.empty(inputs.shape) # torch.Size([6, 3])
-for i, x_i in enumerate(inputs):
-    for j, x_j in enumerate(inputs):
-        context_vectors[i] += attention_weights[i][j] * x_j
+context_vectors = attention_weights @ inputs
 
 print(context_vectors)
