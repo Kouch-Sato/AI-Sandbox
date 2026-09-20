@@ -9,18 +9,17 @@ inputs = torch.tensor(
    [0.05, 0.80, 0.55]] # step     (x^6)
 )
 
-query = inputs[1]
-attention_scores_2 = torch.empty(inputs.shape[0])
-for index, value in enumerate(inputs):
-    attention_scores_2[index] = torch.dot(value, query)
+token_count = inputs.shape[0] 
+attention_scores = torch.empty(token_count, token_count) # torch.Size([6, 6])
+for i, x_i in enumerate(inputs):
+    for j, x_j in enumerate(inputs):
+        attention_scores[i][j] = torch.dot(x_i, x_j)
 
-attention_weights_2 = torch.softmax(attention_scores_2, dim=0) # torch.Size([6])
+attention_weights = torch.softmax(attention_scores, dim=-1) 
 
-print(attention_weights_2.shape)
+context_vectors = torch.empty(inputs.shape) # torch.Size([6, 3])
+for i, x_i in enumerate(inputs):
+    for j, x_j in enumerate(inputs):
+        context_vectors[i] += attention_weights[i][j] * x_j
 
-context_vector_2 = torch.empty(query.shape) # torch.Size([3])
-for index, value in enumerate(inputs):
-    context_vector_2 += attention_weights_2[index] * value
-
-print(query)
-print(context_vector_2)
+print(context_vectors)
