@@ -1,26 +1,31 @@
 import torch
 import torch.nn as nn
 
-class SelfAttention_v1(nn.Module):
-    def __init__(self, d_in, d_out, bias=False):
+class CausalAttention(nn.Module):
+    def __init__(self, d_in, d_out, context_length, dropout, bias=False):
         super().__init__()
         self.w_query = nn.Linear(d_in, d_out, bias=bias)
         self.w_key = nn.Linear(d_in, d_out, bias=bias)
         self.w_value = nn.Linear(d_in, d_out, bias=bias)
+        self.dropout = nn.Dropout(dropout)
+        self.register_buffer(
+            'mask',
+            torch.triu(torch.ones(context_length, context_length), diagonal=1)
+        )
 
     def forward(self, x):
+        batch_size, num_tokens, d_in = x.shape
+
         keys = self.w_key(x)
         queries = self.w_query(x)
         values = self.w_value(x)
 
-        attention_scores = queries @ keys.T
-        context_length = attention_scores.shape[0]
+        attention_scores = queries @ keys.transpose(1, 2) # batchが追加されたから、0次元は変えずに、1次元と2次元だけ変えたい
 
-        mask = torch.triu(torch.ones(context_length, context_length), diagonal=1)
-        masked_attention_scores = attention_scores.masked_fill(mask.bool(), -torch.inf)
+        attention_scores.masked_fill_(self.mask[:num_tokens, :num_tokens].bool(), -torch.inf)
         
-        d_k = keys.shape[1]
-        self.attention_weights = torch.softmax(masked_attention_scores / (d_k ** 0.5), dim=-1)
+        d_k = keys.shape[-1]
+        self.attention_weights = torch.softmax(attention_scores / (d_k ** 0.5), dim=-1)
 
         context_vectors = self.attention_weights @ values
         return context_vectors
@@ -37,10 +42,13 @@ inputs = torch.tensor(
 d_in = inputs.shape[1]
 d_out = 2 
 
-torch.manual_seed(789)
+torch.manual_seed(123)
 
-self_attention = SelfAttention_v1(d_in, d_out)
-context_vectors = self_attention(inputs)
+batch = torch.stack((inputs, inputs), dim=0)
+context_length = batch.shape[1]
+causal_attention = CausalAttention(d_in, d_out, context_length, 0.0)
+context_vectors = causal_attention(batch)
 
-print(self_attention.attention_weights)
+print(causal_attention.attention_weights)
 print(context_vectors.shape)
+print(context_vectors)
