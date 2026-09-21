@@ -3,8 +3,14 @@ import torch.nn as nn
 
 class MultiHeadAttentionWrapper(nn.Module):
     def __init__(self, d_in, d_out, context_length, dropout, num_heads, bias=False):
-        super().__init__()        
+        super().__init__()
+        self.heads = nn.ModuleList([
+            CausalAttention(d_in, d_out, context_length, dropout, bias)
+            for i in range(num_heads)
+        ])
 
+    def forward(self, x):
+        return torch.cat([head(x) for head in self.heads], dim=-1)
 
 class CausalAttention(nn.Module):
     def __init__(self, d_in, d_out, context_length, dropout, bias=False):
@@ -51,9 +57,8 @@ torch.manual_seed(123)
 
 batch = torch.stack((inputs, inputs), dim=0)
 context_length = batch.shape[1]
-causal_attention = CausalAttention(d_in, d_out, context_length, 0.0)
-context_vectors = causal_attention(batch)
+multi_head_attention = MultiHeadAttentionWrapper(d_in, d_out, context_length, 0.0, num_heads=3)
+context_vec = multi_head_attention.forward(batch)
 
-print(causal_attention.attention_weights)
-print(context_vectors.shape)
-print(context_vectors)
+print(context_vec.shape)
+print(context_vec)
