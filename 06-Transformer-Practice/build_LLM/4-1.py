@@ -23,7 +23,7 @@ class DummyGPTModel(nn.Module):
             *[DummyTransformerBlock(config) for i in range(config["n_layers"])]
         )
 
-        self.final_norm = DummyLayerNorm(config["emb_dim"])
+        self.final_norm = LayerNorm(config["emb_dim"])
         self.out_head = nn.Linear(
             config["emb_dim"], config["vocab_size"], bias=False
         )
@@ -48,13 +48,19 @@ class DummyTransformerBlock(nn.Module):
     def forward(self, x):
         return x
 
-class DummyLayerNorm(nn.Module):
-    def __init__(self, normalized_shape, eps=1e-5):
+class LayerNorm(nn.Module):
+    def __init__(self, emb_dim):
         super().__init__()
 
-    def forward(self, x):
-        return x
+        self.eps = 1e-5
+        self.scale = nn.Parameter(torch.ones(emb_dim))
+        self.shift = nn.Parameter(torch.zeros(emb_dim))
 
+    def forward(self, x):
+        mean = x.mean(dim=-1, keepdim=True)
+        var = x.var(dim=-1, keepdim=True, unbiased=False)
+        norm_x = (x - mean) / torch.sqrt(var + self.eps)
+        return norm_x
 
 import tiktoken
 
@@ -72,4 +78,6 @@ torch.manual_seed(123)
 model = DummyGPTModel(GPT_CONFIG_124M)
 logits = model(batch)
 print(logits.shape)
-print(logits)
+
+print(logits.mean(dim=-1, keepdim=True))
+print(logits.var(dim=-1, keepdim=True))
