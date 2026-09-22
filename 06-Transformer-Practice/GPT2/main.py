@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import tiktoken
-from model import DummyGPTModel
+from model import DummyGPTModel, TransformerBlock
 from layers import FeedForward
 
 GPT_CONFIG_124M = {
@@ -29,6 +29,6 @@ model = DummyGPTModel(GPT_CONFIG_124M)
 logits = model(batch)
 print(logits.shape)
 
-ffn = FeedForward(GPT_CONFIG_124M)
+block = TransformerBlock(GPT_CONFIG_124M)
 x = torch.rand(2, 3, 768)
-print(ffn(x).shape)
+print(block(x).shape)

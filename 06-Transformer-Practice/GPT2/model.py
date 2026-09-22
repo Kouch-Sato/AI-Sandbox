@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 from layers import LayerNorm, FeedForward
+from attention import MultiHeadAttention
 
 class DummyGPTModel(nn.Module):
     def __init__(self, config):
@@ -11,7 +12,7 @@ class DummyGPTModel(nn.Module):
         self.drop_emb_layer = nn.Dropout(config["drop_rate"])
 
         self.trf_blocks = nn.Sequential(
-            *[DummyTransformerBlock(config) for i in range(config["n_layers"])]
+            *[TransformerBlock(config) for i in range(config["n_layers"])]
         )
 
         self.final_norm = LayerNorm(config["emb_dim"])
@@ -32,9 +33,35 @@ class DummyGPTModel(nn.Module):
 
         return logits
 
-class DummyTransformerBlock(nn.Module):
+class TransformerBlock(nn.Module):
     def __init__(self, config):
         super().__init__()
 
+        self.attention = MultiHeadAttention(
+            d_in=config["emb_dim"],
+            d_out=config["emb_dim"], 
+            context_length=config["context_length"],
+            dropout=config["drop_rate"],
+            num_heads=config["n_heads"], 
+            bias=config["qkv_bias"],
+        )
+
+        self.feedforward = FeedForward(config)
+        self.layer_norm_1 = LayerNorm(config["emb_dim"])
+        self.layer_norm_2 = LayerNorm(config["emb_dim"])
+        self.dropout = nn.Dropout(config["drop_rate"])
+
     def forward(self, x):
+        shortcut = x
+        x = self.layer_norm_1(x)
+        x = self.attention(x)
+        x = self.dropout(x)
+        x = x + shortcut
+
+        shortcut = x
+        x = self.layer_norm_2(x)
+        x = self.feedforward(x)
+        x = self.dropout(x)
+        x = x + shortcut
+
         return x
