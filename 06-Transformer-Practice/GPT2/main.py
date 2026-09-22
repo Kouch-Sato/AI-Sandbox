@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import tiktoken
-from model import DummyGPTModel, TransformerBlock
+from model import GPTModel, TransformerBlock
 from layers import FeedForward
 
 GPT_CONFIG_124M = {
@@ -25,10 +25,12 @@ batch = torch.stack(batch, dim=0)
 print(batch)
 
 torch.manual_seed(123)
-model = DummyGPTModel(GPT_CONFIG_124M)
+model = GPTModel(GPT_CONFIG_124M)
 logits = model(batch)
-print(logits.shape)
 
-block = TransformerBlock(GPT_CONFIG_124M)
-x = torch.rand(2, 3, 768)
-print(block(x).shape)
+sum = 0
+for p in model.parameters():
+    print(p.shape, p.numel())
+    sum += p.numel()
+
+print(sum)

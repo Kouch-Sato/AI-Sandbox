@@ -3,7 +3,7 @@ import torch.nn as nn
 from layers import LayerNorm, FeedForward
 from attention import MultiHeadAttention
 
-class DummyGPTModel(nn.Module):
+class GPTModel(nn.Module):
     def __init__(self, config):
         super().__init__()
 
