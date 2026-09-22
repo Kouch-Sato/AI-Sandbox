@@ -62,6 +62,19 @@ class LayerNorm(nn.Module):
         norm_x = (x - mean) / torch.sqrt(var + self.eps)
         return norm_x
 
+class FeedForward(nn.Module):
+    def __init__(self, config):
+        super().__init__()
+
+        self.layers = nn.Sequential(
+            nn.Linear(config["emb_dim"], 4 * config["emb_dim"]),
+            nn.GELU(),
+            nn.Linear(4 * config["emb_dim"], config["emb_dim"]),
+        )
+
+    def forward(self, x):
+        return self.layers(x)
+
 import tiktoken
 
 tokenizer = tiktoken.get_encoding("gpt2")
@@ -79,5 +92,6 @@ model = DummyGPTModel(GPT_CONFIG_124M)
 logits = model(batch)
 print(logits.shape)
 
-print(logits.mean(dim=-1, keepdim=True))
-print(logits.var(dim=-1, keepdim=True))
+ffn = FeedForward(GPT_CONFIG_124M)
+x = torch.rand(2, 3, 768)
+print(ffn(x).shape)
