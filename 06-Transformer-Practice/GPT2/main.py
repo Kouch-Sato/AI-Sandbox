@@ -16,21 +16,41 @@ GPT_CONFIG_124M = {
 
 tokenizer = tiktoken.get_encoding("gpt2")
 batch = []
-txt1 = "Every effort makes you"
-txt2 = "Every day holds a"
+txt1 = "I love Jobs because"
+txt2 = "Today, we are"
 
 batch.append(torch.tensor(tokenizer.encode(txt1)))
 batch.append(torch.tensor(tokenizer.encode(txt2)))
 batch = torch.stack(batch, dim=0)
-print(batch)
 
 torch.manual_seed(123)
 model = GPTModel(GPT_CONFIG_124M)
 logits = model(batch)
 
-sum = 0
-for p in model.parameters():
-    print(p.shape, p.numel())
-    sum += p.numel()
+def generate_text_simple(model, idx, max_new_tokens, context_size):
+    for _ in range(max_new_tokens):
+        idx_cond = idx[:, -context_size:]
 
-print(sum)
+        with torch.no_grad():
+            logits = model(idx_cond) # [2, 4, 50257]
+
+        logits = logits[:, -1, :] # [2, 50257]
+        next_index_probas = torch.softmax(logits, dim=-1) # Probabilities
+        next_index = torch.argmax(next_index_probas, dim=-1, keepdim=True)
+
+        idx = torch.cat((idx, next_index), dim=-1)
+
+    return idx
+        
+model.eval()
+
+out = generate_text_simple(
+    model=model,
+    idx=batch,
+    max_new_tokens=6,
+    context_size=GPT_CONFIG_124M["context_length"]
+)
+
+for indeces in out:
+    decoded_text = tokenizer.decode(indeces.tolist())
+    print(decoded_text)
