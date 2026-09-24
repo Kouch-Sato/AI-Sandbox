@@ -3,6 +3,8 @@ import torch.nn as nn
 import tiktoken
 from model import GPTModel, TransformerBlock
 from layers import FeedForward
+from gpt_download import download_and_load_gpt2
+from load_weights import load_weights_into_gpt 
 
 GPT_CONFIG_124M = {
     "vocab_size": 50257,
@@ -41,6 +43,9 @@ torch.manual_seed(123)
 model = GPTModel(NEW_CONFIG)
 model.eval()
 
+settings, params = download_and_load_gpt2(model_size="124M", models_dir="gpt2")
+load_weights_into_gpt(model, params)
+
 def generate_text_simple(model, idx, max_new_tokens, context_size):
     for _ in range(max_new_tokens):
         idx_cond = idx[:, -context_size:]
@@ -60,9 +65,9 @@ out = generate_text_simple(
     model=model,
     idx=batch,
     max_new_tokens=6,
-    context_size=GPT_CONFIG_124M["context_length"]
+    context_size=NEW_CONFIG["context_length"]
 )
 
-for indeces in out:
-    decoded_text = tokenizer.decode(indeces.tolist())
+for indices in out:
+    decoded_text = tokenizer.decode(indices.tolist())
     print(decoded_text)
