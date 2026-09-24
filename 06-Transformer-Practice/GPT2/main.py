@@ -14,6 +14,18 @@ GPT_CONFIG_124M = {
     "qkv_bias": False
 }
 
+model_configs = {
+    "gpt2-small": {
+        "emb_dim": 768,
+        "n_layers": 12, 
+        "n_heads": 12, 
+        "qkv_bias": True
+    }
+}
+
+NEW_CONFIG = GPT_CONFIG_124M.copy()
+NEW_CONFIG.update(model_configs["gpt2-small"])
+
 tokenizer = tiktoken.get_encoding("gpt2")
 batch = []
 txt1 = "I love Jobs because"
@@ -26,8 +38,8 @@ batch.append(torch.tensor(tokenizer.encode(txt3)))
 batch = torch.stack(batch, dim=0)
 
 torch.manual_seed(123)
-model = GPTModel(GPT_CONFIG_124M)
-logits = model(batch)
+model = GPTModel(NEW_CONFIG)
+model.eval()
 
 def generate_text_simple(model, idx, max_new_tokens, context_size):
     for _ in range(max_new_tokens):
@@ -43,8 +55,6 @@ def generate_text_simple(model, idx, max_new_tokens, context_size):
         idx = torch.cat((idx, next_index), dim=-1)
 
     return idx
-        
-model.eval()
 
 out = generate_text_simple(
     model=model,
