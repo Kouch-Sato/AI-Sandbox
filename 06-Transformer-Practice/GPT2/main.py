@@ -18,9 +18,11 @@ tokenizer = tiktoken.get_encoding("gpt2")
 batch = []
 txt1 = "I love Jobs because"
 txt2 = "Today, we are"
+txt3 = "The meaning of life"
 
 batch.append(torch.tensor(tokenizer.encode(txt1)))
 batch.append(torch.tensor(tokenizer.encode(txt2)))
+batch.append(torch.tensor(tokenizer.encode(txt3)))
 batch = torch.stack(batch, dim=0)
 
 torch.manual_seed(123)

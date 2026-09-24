@@ -32,3 +32,12 @@ torch.Size([768]) 768 # bias
 
 ## out_head
 torch.Size([50257, 768]) 38597376 # out_head weight
+
+# GPTモデルの変遷
+txt1 = "I love Jobs because"
+txt2 = "Today, we are"
+
+## 4章直後、ランダムな重み
+I love Jobs because theatre unfolds Dice architect 59Ocean
+Today, we are 342 IT!/rill architectures Ridley
+The meaning of life Aeiman Byeswickattribute argue
