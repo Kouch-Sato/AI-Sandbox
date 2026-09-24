@@ -64,7 +64,7 @@ def generate_text_simple(model, idx, max_new_tokens, context_size):
 out = generate_text_simple(
     model=model,
     idx=batch,
-    max_new_tokens=6,
+    max_new_tokens=10,
     context_size=NEW_CONFIG["context_length"]
 )
 

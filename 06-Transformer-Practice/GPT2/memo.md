@@ -34,6 +34,7 @@ torch.Size([768]) 768 # bias
 torch.Size([50257, 768]) 38597376 # out_head weight
 
 # GPTモデルの変遷
+## 入力した文字列
 txt1 = "I love Jobs because"
 txt2 = "Today, we are"
 
@@ -41,3 +42,8 @@ txt2 = "Today, we are"
 I love Jobs because theatre unfolds Dice architect 59Ocean
 Today, we are 342 IT!/rill architectures Ridley
 The meaning of life Aeiman Byeswickattribute argue
+
+## ５−５でGPT2-smallの重みをinstallしたとき
+I love Jobs because he's a great guy. He's a great
+Today, we are going to be doing a lot of work on the
+The meaning of life is not the same as the meaning of death.
