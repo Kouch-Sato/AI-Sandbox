@@ -150,10 +150,3 @@ def load_gpt2_params_from_tf_ckpt(ckpt_path, settings):
         target_dict[last_key] = variable_array
 
     return params
-
-
-from gpt_download import download_and_load_gpt2
-settings, params = download_and_load_gpt2(model_size="124M", models_dir="gpt2")
-
-print(settings)
-print(params.keys())
