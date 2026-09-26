@@ -21,12 +21,18 @@ model_configs = {
         "emb_dim": 768,
         "n_layers": 12, 
         "n_heads": 12, 
-        "qkv_bias": True
+        "qkv_bias": True,
+    },
+    "gpt2-medium": {
+        "emb_dim": 1024,
+        "n_layers": 24, 
+        "n_heads": 16, 
+        "qkv_bias": True,
     }
 }
 
 NEW_CONFIG = GPT_CONFIG_124M.copy()
-NEW_CONFIG.update(model_configs["gpt2-small"])
+NEW_CONFIG.update(model_configs["gpt2-medium"])
 
 tokenizer = tiktoken.get_encoding("gpt2")
 batch = []
@@ -43,7 +49,7 @@ torch.manual_seed(123)
 model = GPTModel(NEW_CONFIG)
 model.eval()
 
-settings, params = download_and_load_gpt2(model_size="124M", models_dir="gpt2")
+settings, params = download_and_load_gpt2(model_size="355M", models_dir="gpt2")
 load_weights_into_gpt(model, params)
 
 def generate_text_simple(model, idx, max_new_tokens, context_size):
